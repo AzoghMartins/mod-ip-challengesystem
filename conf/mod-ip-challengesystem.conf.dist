@@ -21,6 +21,9 @@ ChallengeSystem.Hardcore.BlockPlayerBots = 1
 # 0 disables the test aura.
 # ----------------------------------------------------------------
 ChallengeSystem.TestAura.Hardcore = 0
+ChallengeSystem.TestAura.SoloOnly = 0
 ChallengeSystem.TestAura.NoTrade = 0
 ChallengeSystem.TestAura.NoMail = 0
 ChallengeSystem.TestAura.NoAuction = 0
+ChallengeSystem.TestAura.NoSummons = 0
+ChallengeSystem.TestAura.Permadeath = 0

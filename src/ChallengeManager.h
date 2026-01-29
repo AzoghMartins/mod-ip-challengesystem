@@ -6,9 +6,11 @@
 #include <vector>
 #include <memory>
 #include <string>
+#include <unordered_set>
 
 class Player;
 class Group;
+class Unit;
 class ChallengeRestriction;
 
 /**
@@ -29,6 +31,8 @@ public:
     // Lifecycle
     void OnTierStart(Player* player);
     void OnTierEnd(Player* player);
+    void HandlePlayerUpdate(Player* player);
+    void HandlePlayerLogout(Player* player);
 
     // Restriction registry
     void RegisterRestriction(std::shared_ptr<ChallengeRestriction> restriction);
@@ -42,14 +46,16 @@ public:
     bool HandleAuctionAction(Player* player);
     bool HandleGroupInvite(Player* player, Player* target);
     bool HandleGroupAccept(Player* player, Group* group);
-    bool HandleSummonAccept(Player* player);
+    bool HandleSummonAccept(Player* player, Unit* target, uint32 options);
     bool HandleItemUse(Player* player, uint32 itemId);
-    void HandleDeath(Player* player);
+    bool HandleDeath(Player* player);
 
 private:
     ChallengeManager() = default;
 
     std::vector<std::shared_ptr<ChallengeRestriction>> _restrictions;
+    std::unordered_set<uint64> _permadeathActive;
+    std::unordered_set<uint64> _permadeathFailures;
 };
 
 #endif // MOD_IP_CHALLENGESYSTEM_CHALLENGE_MANAGER_H

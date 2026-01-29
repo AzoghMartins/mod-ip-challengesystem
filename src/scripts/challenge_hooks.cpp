@@ -18,6 +18,14 @@ void SendPlayerError(Player* player, char const* message)
 
     ChatHandler(player->GetSession()).SendSysMessage(message);
 }
+
+void SendPlayerNotification(Player* player, char const* message)
+{
+    if (!player || !player->GetSession())
+        return;
+
+    ChatHandler(player->GetSession()).SendNotification(message);
+}
 }
 
 class ChallengeSystemHooks : public PlayerScript
@@ -30,7 +38,7 @@ public:
         Player* target = ObjectAccessor::FindPlayerByName(membername, false);
         if (!ChallengeManager::Instance().HandleGroupInvite(inviter, target))
         {
-            SendPlayerError(inviter, "Hardcore characters may only group with other Hardcore tier members.");
+            SendPlayerError(inviter, "Grouping is disabled by active Challenge restrictions.");
             return false;
         }
 
@@ -44,7 +52,7 @@ public:
 
         if (!ChallengeManager::Instance().HandleGroupAccept(player, group))
         {
-            SendPlayerError(player, "Hardcore characters may only group with other Hardcore tier members.");
+            SendPlayerError(player, "Grouping is disabled by active Challenge restrictions.");
             return false;
         }
 
@@ -84,6 +92,36 @@ public:
         }
 
         return true;
+    }
+
+    void OnPlayerUpdate(Player* player, uint32 /*p_time*/) override
+    {
+        ChallengeManager::Instance().HandlePlayerUpdate(player);
+    }
+
+    void OnPlayerLogout(Player* player) override
+    {
+        ChallengeManager::Instance().HandlePlayerLogout(player);
+    }
+
+    bool OnPlayerBeforeTeleport(Player* player, uint32 /*mapid*/, float /*x*/, float /*y*/, float /*z*/,
+                                float /*orientation*/, uint32 options, Unit* target) override
+    {
+        if (!ChallengeManager::Instance().HandleSummonAccept(player, target, options))
+        {
+            SendPlayerError(player, "Summons are disabled by active Challenge restrictions.");
+            return false;
+        }
+
+        return true;
+    }
+
+    void OnPlayerJustDied(Player* player) override
+    {
+        if (ChallengeManager::Instance().HandleDeath(player))
+        {
+            SendPlayerNotification(player, "Hardcore failed for this tier (death). You may continue playing, but the tier is marked failed.");
+        }
     }
 };
 

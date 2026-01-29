@@ -8,9 +8,12 @@ This is a temporary stand-in for real tier state tracking.
 Set these keys in `mod-ip-challengesystem.conf`:
 
 - `ChallengeSystem.TestAura.Hardcore` (spell aura ID)
+- `ChallengeSystem.TestAura.SoloOnly` (spell aura ID)
 - `ChallengeSystem.TestAura.NoTrade` (spell aura ID)
 - `ChallengeSystem.TestAura.NoMail` (spell aura ID)
 - `ChallengeSystem.TestAura.NoAuction` (spell aura ID)
+- `ChallengeSystem.TestAura.NoSummons` (spell aura ID)
+- `ChallengeSystem.TestAura.Permadeath` (spell aura ID)
 
 If a key is `0`, the restriction is treated as inactive.
 
@@ -25,3 +28,7 @@ If a key is `0`, the restriction is treated as inactive.
 ## TODO
 
 Replace aura-based testing with real tier/restriction state from the database.
+
+## Notes
+
+Warning: `NO_SUMMONS` currently blocks summon accepts (e.g., warlock/meeting stone) via the teleport hook. Some teleport/portal paths may bypass this until deeper hooks are added. TODO: expand summon/portal detection coverage.
