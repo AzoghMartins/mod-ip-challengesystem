@@ -1,6 +1,8 @@
 #ifndef MOD_IP_CHALLENGESYSTEM_CHALLENGE_RESTRICTION_H
 #define MOD_IP_CHALLENGESYSTEM_CHALLENGE_RESTRICTION_H
 
+#include "Define.h"
+
 #include <string>
 #include <cstdint>
 

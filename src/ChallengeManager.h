@@ -1,10 +1,14 @@
 #ifndef MOD_IP_CHALLENGESYSTEM_CHALLENGE_MANAGER_H
 #define MOD_IP_CHALLENGESYSTEM_CHALLENGE_MANAGER_H
 
+#include "Define.h"
+
 #include <vector>
 #include <memory>
+#include <string>
 
 class Player;
+class Group;
 class ChallengeRestriction;
 
 /**
@@ -33,11 +37,11 @@ public:
     bool HasRestriction(Player* player, const std::string& restrictionId) const;
 
     // Event dispatch (called from hooks)
-    bool HandleTradeAttempt(Player* player);
+    bool HandleTradeAttempt(Player* player, Player* target);
     bool HandleMailSend(Player* player);
     bool HandleAuctionAction(Player* player);
     bool HandleGroupInvite(Player* player, Player* target);
-    bool HandleGroupAccept(Player* player);
+    bool HandleGroupAccept(Player* player, Group* group);
     bool HandleSummonAccept(Player* player);
     bool HandleItemUse(Player* player, uint32 itemId);
     void HandleDeath(Player* player);

@@ -14,3 +14,11 @@ ChallengeSystem.Hardcore.AutoReinviteGuild = 1
 # If enabled, Hardcore characters cannot recruit/summon or control playerbots in ways
 # that provide combat advantage.
 ChallengeSystem.Hardcore.BlockPlayerBots = 1
+
+# ----------------------------------------------------------------
+# Temporary test auras (DEV ONLY)
+# Set to a spell aura ID to simulate a restriction for testing.
+# 0 disables the test aura.
+# ----------------------------------------------------------------
+ChallengeSystem.TestAura.Hardcore = 0
+ChallengeSystem.TestAura.NoTrade = 0
