@@ -1,0 +1,80 @@
+# ================================
+# OS / Editor junk
+# ================================
+.DS_Store
+Thumbs.db
+
+.vscode/
+!.vscode/extensions.json
+
+.idea/
+*.swp
+*.swo
+*~
+
+# ================================
+# Build artifacts (AzerothCore)
+# ================================
+/build/
+/bin/
+/obj/
+/CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# ================================
+# Compiler outputs
+# ================================
+*.o
+*.obj
+*.lo
+*.la
+*.a
+*.so
+*.dll
+*.dylib
+*.exe
+*.out
+
+# ================================
+# Logs / runtime
+# ================================
+*.log
+*.pid
+
+# ================================
+# Local configuration
+# ================================
+*.conf
+!*.conf.dist
+
+# ================================
+# Generated / temporary
+# ================================
+*.tmp
+*.bak
+*.old
+
+# ================================
+# SQL dumps / local experiments
+# ================================
+*.sql~
+*_local.sql
+*_test.sql
+
+# ================================
+# Coverage / tooling
+# ================================
+*.gcda
+*.gcno
+*.gcov
+coverage/
+
+# ================================
+# Archives
+# ================================
+*.zip
+*.tar.gz
+*.7z
+
