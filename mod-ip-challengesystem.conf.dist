@@ -1,0 +1,16 @@
+#################################################################
+# mod-ip-challengesystem
+#################################################################
+
+ChallengeSystem.Enable = 1
+
+# Grace period (seconds) for invalid group states (Hardcore / Solo).
+ChallengeSystem.GroupGracePeriod = 45
+
+# If enabled, Hardcore characters are automatically re-invited to the Hardcore guild
+# if they leave while a Hardcore tier is active.
+ChallengeSystem.Hardcore.AutoReinviteGuild = 1
+
+# If enabled, Hardcore characters cannot recruit/summon or control playerbots in ways
+# that provide combat advantage.
+ChallengeSystem.Hardcore.BlockPlayerBots = 1
