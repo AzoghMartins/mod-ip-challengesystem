@@ -8,6 +8,8 @@ namespace
 {
 constexpr char kRestrictionHardcoreManualGroup[] = "HC_MANUAL_GROUP_ONLY_WITH_HC_TIER";
 constexpr char kRestrictionNoTrade[] = "NO_TRADE";
+constexpr char kRestrictionNoMail[] = "NO_MAIL";
+constexpr char kRestrictionNoAuction[] = "NO_AUCTION";
 }
 
 ChallengeManager& ChallengeManager::Instance()
@@ -43,6 +45,14 @@ bool ChallengeManager::HasRestriction(Player* player, const std::string& restric
     {
         auraId = sConfigMgr->GetOption<uint32>("ChallengeSystem.TestAura.NoTrade", 0);
     }
+    else if (restrictionId == kRestrictionNoMail)
+    {
+        auraId = sConfigMgr->GetOption<uint32>("ChallengeSystem.TestAura.NoMail", 0);
+    }
+    else if (restrictionId == kRestrictionNoAuction)
+    {
+        auraId = sConfigMgr->GetOption<uint32>("ChallengeSystem.TestAura.NoAuction", 0);
+    }
     else
     {
         return false;
@@ -69,13 +79,25 @@ bool ChallengeManager::HandleTradeAttempt(Player* player, Player* target)
     return true;
 }
 
-bool ChallengeManager::HandleMailSend(Player* /*player*/)
+bool ChallengeManager::HandleMailSend(Player* player)
 {
+    if (!player)
+        return true;
+
+    if (HasRestriction(player, kRestrictionNoMail))
+        return false;
+
     return true;
 }
 
-bool ChallengeManager::HandleAuctionAction(Player* /*player*/)
+bool ChallengeManager::HandleAuctionAction(Player* player)
 {
+    if (!player)
+        return true;
+
+    if (HasRestriction(player, kRestrictionNoAuction))
+        return false;
+
     return true;
 }
 

@@ -9,6 +9,8 @@ Set these keys in `mod-ip-challengesystem.conf`:
 
 - `ChallengeSystem.TestAura.Hardcore` (spell aura ID)
 - `ChallengeSystem.TestAura.NoTrade` (spell aura ID)
+- `ChallengeSystem.TestAura.NoMail` (spell aura ID)
+- `ChallengeSystem.TestAura.NoAuction` (spell aura ID)
 
 If a key is `0`, the restriction is treated as inactive.
 

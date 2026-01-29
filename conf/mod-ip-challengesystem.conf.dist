@@ -22,3 +22,5 @@ ChallengeSystem.Hardcore.BlockPlayerBots = 1
 # ----------------------------------------------------------------
 ChallengeSystem.TestAura.Hardcore = 0
 ChallengeSystem.TestAura.NoTrade = 0
+ChallengeSystem.TestAura.NoMail = 0
+ChallengeSystem.TestAura.NoAuction = 0
