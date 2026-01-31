@@ -1,6 +1,9 @@
 #include "ChallengeManager.h"
 #include "Chat.h"
 #include "CommandScript.h"
+#include "Config.h"
+#include "Guild.h"
+#include "GuildMgr.h"
 #include "Player.h"
 #include "StringConvert.h"
 
@@ -100,6 +103,30 @@ std::string DescribeFlags(uint32 flags)
         parts.emplace_back("NoSummons");
     if (flags & ChallengeManager::FLAG_PERMADEATH)
         parts.emplace_back("Permadeath");
+    if (flags & ChallengeManager::FLAG_LOW_QUALITY_ONLY)
+        parts.emplace_back("LowQualityOnly");
+    if (flags & ChallengeManager::FLAG_SELF_CRAFTED)
+        parts.emplace_back("SelfCrafted");
+    if (flags & ChallengeManager::FLAG_POVERTY)
+        parts.emplace_back("Poverty");
+    if (flags & ChallengeManager::FLAG_NO_GUILD_BANK)
+        parts.emplace_back("NoGuildBank");
+    if (flags & ChallengeManager::FLAG_NO_MOUNTS)
+        parts.emplace_back("NoMounts");
+    if (flags & ChallengeManager::FLAG_NO_BUFFS)
+        parts.emplace_back("NoBuffs");
+    if (flags & ChallengeManager::FLAG_NO_TALENTS)
+        parts.emplace_back("NoTalents");
+    if (flags & ChallengeManager::FLAG_NO_QUEST_XP)
+        parts.emplace_back("NoQuestXP");
+    if (flags & ChallengeManager::FLAG_ONLY_QUEST_XP)
+        parts.emplace_back("OnlyQuestXP");
+    if (flags & ChallengeManager::FLAG_HALF_XP)
+        parts.emplace_back("HalfXP");
+    if (flags & ChallengeManager::FLAG_QUARTER_XP)
+        parts.emplace_back("QuarterXP");
+    if (flags & ChallengeManager::FLAG_NO_BOTS)
+        parts.emplace_back("NoBots");
 
     if (parts.empty())
         return "none";
@@ -125,9 +152,10 @@ public:
     {
         static ChatCommandTable ipChallengeCommandTable =
         {
-            { "set",    HandleIpChallengeSet,    SEC_GAMEMASTER, Console::No },
-            { "clear",  HandleIpChallengeClear,  SEC_GAMEMASTER, Console::No },
-            { "status", HandleIpChallengeStatus, SEC_GAMEMASTER, Console::No }
+            { "set",         HandleIpChallengeSet,         SEC_GAMEMASTER, Console::No },
+            { "clear",       HandleIpChallengeClear,       SEC_GAMEMASTER, Console::No },
+            { "status",      HandleIpChallengeStatus,      SEC_GAMEMASTER, Console::No },
+            { "createguild", HandleIpChallengeCreateGuild, SEC_GAMEMASTER, Console::No }
         };
 
         static ChatCommandTable commandTable =
@@ -205,6 +233,44 @@ public:
 
         handler->PSendSysMessage("Active tier: {} | Active flags: {} ({})", tier, flags, DescribeFlags(flags));
         handler->PSendSysMessage("Permadeath: {}", permadead ? "YES" : "NO");
+        return true;
+    }
+
+    static bool HandleIpChallengeCreateGuild(ChatHandler* handler)
+    {
+        Player* player = ResolveTarget(handler);
+        if (!player)
+            return false;
+
+        std::string guildName = sConfigMgr->GetOption<std::string>("ChallengeSystem.Hardcore.GuildName", "");
+        if (guildName.empty())
+        {
+            handler->SendSysMessage("ChallengeSystem.Hardcore.GuildName is not set.");
+            return false;
+        }
+
+        if (sGuildMgr->GetGuildByName(guildName))
+        {
+            handler->PSendSysMessage("Guild '{}' already exists.", guildName);
+            return false;
+        }
+
+        if (player->GetGuildId() != 0)
+        {
+            handler->PSendSysMessage("{} is already in a guild.", player->GetName());
+            return false;
+        }
+
+        Guild* guild = new Guild();
+        if (!guild->Create(player, guildName))
+        {
+            delete guild;
+            handler->PSendSysMessage("Failed to create guild '{}'.", guildName);
+            return false;
+        }
+
+        sGuildMgr->AddGuild(guild);
+        handler->PSendSysMessage("Guild '{}' created. {} is now guild leader.", guildName, player->GetName());
         return true;
     }
 };

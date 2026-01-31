@@ -11,6 +11,7 @@ Commands apply to the selected player if one is targeted, otherwise to yourself.
   - Example: `.ipchallenge set tier 1 flags 5`
 - `.ipchallenge clear`
 - `.ipchallenge status`
+- `.ipchallenge createguild`
 
 Flag bitmask (locked):
 - Hardcore = 1
@@ -20,6 +21,18 @@ Flag bitmask (locked):
 - No AH = 16
 - No Summons = 32
 - Permadeath = 64
+- Low Quality Only = 128
+- Self Crafted = 256
+- Poverty = 512
+- No Guild Bank = 1024
+- No Mounts = 2048
+- No Buffs = 4096
+- No Talents = 8192
+- No Quest XP = 16384
+- Only Quest XP = 32768
+- Half XP = 65536
+- Quarter XP = 131072
+- No Bots = 262144
 
 ## Aura override (DEV fallback)
 
@@ -33,6 +46,18 @@ Set these keys in `mod-ip-challengesystem.conf`:
 - `ChallengeSystem.TestAura.NoAuction`
 - `ChallengeSystem.TestAura.NoSummons`
 - `ChallengeSystem.TestAura.Permadeath`
+- `ChallengeSystem.TestAura.LowQualityOnly`
+- `ChallengeSystem.TestAura.SelfCrafted`
+- `ChallengeSystem.TestAura.Poverty`
+- `ChallengeSystem.TestAura.NoGuildBank`
+- `ChallengeSystem.TestAura.NoMounts`
+- `ChallengeSystem.TestAura.NoBuffs`
+- `ChallengeSystem.TestAura.NoTalents`
+- `ChallengeSystem.TestAura.NoQuestXP`
+- `ChallengeSystem.TestAura.OnlyQuestXP`
+- `ChallengeSystem.TestAura.HalfXP`
+- `ChallengeSystem.TestAura.QuarterXP`
+- `ChallengeSystem.TestAura.NoBots`
 
 Usage:
 1) Apply the aura to a character:
@@ -52,6 +77,7 @@ Config keys:
 - `ChallengeSystem.Permadeath.Enable`
 - `ChallengeSystem.Permadeath.KickDelaySeconds`
 - `ChallengeSystem.Permadeath.Broadcast`
+- `ChallengeSystem.Permadeath.BroadcastMessage`
 - `ChallengeSystem.Permadeath.CountPvPDeaths`
 - `ChallengeSystem.Permadeath.CountBattlegroundDeaths`
 - `ChallengeSystem.Permadeath.CountArenaDeaths`
@@ -61,6 +87,40 @@ Config keys:
 - `ChallengeSystem.Permadeath.GhostY`
 - `ChallengeSystem.Permadeath.GhostZ`
 - `ChallengeSystem.Permadeath.GhostO`
+
+## Restriction tuning config
+
+- `ChallengeSystem.LowQualityOnly.MaxQuality`
+- `ChallengeSystem.Poverty.GoldCap.Tier1`
+- `ChallengeSystem.Poverty.GoldCap.Tier2`
+- `ChallengeSystem.Poverty.GoldCap.Tier3`
+- `ChallengeSystem.XP.HalfMultiplier`
+- `ChallengeSystem.XP.QuarterMultiplier`
+- `ChallengeSystem.NoBuffs.AllowPassive`
+- `ChallengeSystem.NoBuffs.AllowSpells`
+- `ChallengeSystem.NoBuffs.ScanIntervalMs`
+- `ChallengeSystem.Hardcore.AllowLfg`
+- `ChallengeSystem.SoloOnly.AllowLfg`
+- `ChallengeSystem.Hardcore.GuildName`
+
+## Message overrides
+
+- `ChallengeSystem.Message.GroupBlocked`
+- `ChallengeSystem.Message.TradeBlocked`
+- `ChallengeSystem.Message.MailBlocked`
+- `ChallengeSystem.Message.AuctionBlocked`
+- `ChallengeSystem.Message.SummonBlocked`
+- `ChallengeSystem.Message.EquipBlocked`
+- `ChallengeSystem.Message.GuildBankBlocked`
+- `ChallengeSystem.Message.ResurrectBlocked`
+- `ChallengeSystem.Message.Permadeath.Lockout`
+- `ChallengeSystem.Message.HardcoreGuildJoined`
+- `ChallengeSystem.Message.HardcoreGuildMissing`
+- `ChallengeSystem.Message.HardcoreGuildOtherGuild`
+- `ChallengeSystem.Message.HardcoreGuildJoinFailed`
+- `ChallengeSystem.Message.BotsBlocked`
+- `ChallengeSystem.Message.RndBotsBlocked`
+- `ChallengeSystem.Message.BotsRequireHardcore`
 
 ## Notes
 

@@ -10,10 +10,15 @@ ChallengeSystem.GroupGracePeriod = 45
 # If enabled, Hardcore characters are automatically re-invited to the Hardcore guild
 # if they leave while a Hardcore tier is active.
 ChallengeSystem.Hardcore.AutoReinviteGuild = 1
+ChallengeSystem.Hardcore.GuildName = "Hardcore"
 
 # If enabled, Hardcore characters cannot recruit/summon or control playerbots in ways
 # that provide combat advantage.
 ChallengeSystem.Hardcore.BlockPlayerBots = 1
+ChallengeSystem.Hardcore.AllowLfg = 1
+
+# If enabled, Solo Only characters may enter LFG/DF groups.
+ChallengeSystem.SoloOnly.AllowLfg = 0
 
 # ----------------------------------------------------------------
 # Permadeath settings
@@ -21,6 +26,7 @@ ChallengeSystem.Hardcore.BlockPlayerBots = 1
 ChallengeSystem.Permadeath.Enable = 1
 ChallengeSystem.Permadeath.KickDelaySeconds = 30
 ChallengeSystem.Permadeath.Broadcast = 1
+ChallengeSystem.Permadeath.BroadcastMessage = "Hardcore runner {name} (Level {level}) has been slain. All hail the fallen!"
 ChallengeSystem.Permadeath.CountPvPDeaths = 0
 ChallengeSystem.Permadeath.CountBattlegroundDeaths = 0
 ChallengeSystem.Permadeath.CountArenaDeaths = 0
@@ -30,6 +36,49 @@ ChallengeSystem.Permadeath.GhostX = -11075.463
 ChallengeSystem.Permadeath.GhostY = -1795.9891
 ChallengeSystem.Permadeath.GhostZ = 52.717907
 ChallengeSystem.Permadeath.GhostO = 0.043097086
+
+# ----------------------------------------------------------------
+# Restriction tuning
+# ----------------------------------------------------------------
+# Low Quality Only: maximum allowed item quality to equip (0=poor, 1=common, 2=uncommon, ...).
+ChallengeSystem.LowQualityOnly.MaxQuality = 1
+
+# Poverty gold caps (copper). Set to 0 to disable the cap for that tier.
+ChallengeSystem.Poverty.GoldCap.Tier1 = 0
+ChallengeSystem.Poverty.GoldCap.Tier2 = 0
+ChallengeSystem.Poverty.GoldCap.Tier3 = 0
+
+# XP multipliers for Half/Quarter XP restrictions.
+ChallengeSystem.XP.HalfMultiplier = 0.5
+ChallengeSystem.XP.QuarterMultiplier = 0.25
+
+# No Buffs behavior.
+# AllowPassive keeps passive auras (talents, racial passives, etc.).
+# AllowSpells is a comma-separated list of spell IDs to whitelist.
+# ScanIntervalMs controls how often buffs are scrubbed.
+ChallengeSystem.NoBuffs.AllowPassive = 1
+ChallengeSystem.NoBuffs.AllowSpells = ""
+ChallengeSystem.NoBuffs.ScanIntervalMs = 1000
+
+# ----------------------------------------------------------------
+# Player-facing messages
+# ----------------------------------------------------------------
+ChallengeSystem.Message.GroupBlocked = "Grouping is disabled by active Challenge restrictions."
+ChallengeSystem.Message.TradeBlocked = "Trading is disabled by active Challenge restrictions."
+ChallengeSystem.Message.MailBlocked = "Mail is disabled by active Challenge restrictions."
+ChallengeSystem.Message.AuctionBlocked = "Auction House access is disabled by active Challenge restrictions."
+ChallengeSystem.Message.SummonBlocked = "Summons are disabled by active Challenge restrictions."
+ChallengeSystem.Message.EquipBlocked = "Equipping this item is disabled by active Challenge restrictions."
+ChallengeSystem.Message.GuildBankBlocked = "Guild Bank access is disabled by active Challenge restrictions."
+ChallengeSystem.Message.ResurrectBlocked = "Resurrection is disabled while permadeath is pending."
+ChallengeSystem.Message.Permadeath.Lockout = "This character is permanently dead. You may keep it as a memorial or delete it."
+ChallengeSystem.Message.HardcoreGuildJoined = "You have been added to the Hardcore guild."
+ChallengeSystem.Message.HardcoreGuildMissing = "Hardcore guild not found. Contact a GM."
+ChallengeSystem.Message.HardcoreGuildOtherGuild = "You are already in another guild. Leave it to join the Hardcore guild."
+ChallengeSystem.Message.HardcoreGuildJoinFailed = "Failed to join the Hardcore guild. Contact a GM."
+ChallengeSystem.Message.BotsBlocked = "Player bots are disabled by active Challenge restrictions."
+ChallengeSystem.Message.RndBotsBlocked = "Random bot summoning is disabled by active Challenge restrictions."
+ChallengeSystem.Message.BotsRequireHardcore = "Only Hardcore characters may be summoned as bots."
 
 # ----------------------------------------------------------------
 # Temporary test auras (DEV ONLY)
@@ -43,3 +92,15 @@ ChallengeSystem.TestAura.NoMail = 0
 ChallengeSystem.TestAura.NoAuction = 0
 ChallengeSystem.TestAura.NoSummons = 0
 ChallengeSystem.TestAura.Permadeath = 0
+ChallengeSystem.TestAura.LowQualityOnly = 0
+ChallengeSystem.TestAura.SelfCrafted = 0
+ChallengeSystem.TestAura.Poverty = 0
+ChallengeSystem.TestAura.NoGuildBank = 0
+ChallengeSystem.TestAura.NoMounts = 0
+ChallengeSystem.TestAura.NoBuffs = 0
+ChallengeSystem.TestAura.NoTalents = 0
+ChallengeSystem.TestAura.NoQuestXP = 0
+ChallengeSystem.TestAura.OnlyQuestXP = 0
+ChallengeSystem.TestAura.HalfXP = 0
+ChallengeSystem.TestAura.QuarterXP = 0
+ChallengeSystem.TestAura.NoBots = 0
