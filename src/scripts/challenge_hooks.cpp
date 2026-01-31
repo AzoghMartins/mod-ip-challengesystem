@@ -1,6 +1,10 @@
 #include "ChallengeManager.h"
 #include "AuctionHouseMgr.h"
 #include "Chat.h"
+#include "Creature.h"
+#include "Config.h"
+#include "Duration.h"
+#include "GameTime.h"
 #include "Group.h"
 #include "Mail.h"
 #include "MailScript.h"
@@ -8,6 +12,8 @@
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "ScriptMgr.h"
+
+void AddChallengeSystemCommands();
 
 namespace
 {
@@ -26,12 +32,29 @@ void SendPlayerNotification(Player* player, char const* message)
 
     ChatHandler(player->GetSession()).SendNotification(message);
 }
+
 }
 
 class ChallengeSystemHooks : public PlayerScript
 {
 public:
     ChallengeSystemHooks() : PlayerScript("ip_challengesystem_hooks") {}
+
+    void OnPlayerLogin(Player* player) override
+    {
+        if (ChallengeManager::Instance().IsPermadead(player))
+        {
+            SendPlayerNotification(player, "This character is permanently dead. You may keep it as a memorial or delete it.");
+            if (player && player->GetSession())
+            {
+                time_t now = GameTime::GetGameTime().count();
+                player->GetSession()->SetLogoutStartTime(now > 20 ? now - 20 : 0);
+            }
+            return;
+        }
+
+        ChallengeManager::Instance().HandlePlayerLogin(player);
+    }
 
     bool OnPlayerCanGroupInvite(Player* inviter, std::string& membername) override
     {
@@ -94,14 +117,57 @@ public:
         return true;
     }
 
-    void OnPlayerUpdate(Player* player, uint32 /*p_time*/) override
-    {
-        ChallengeManager::Instance().HandlePlayerUpdate(player);
-    }
-
     void OnPlayerLogout(Player* player) override
     {
         ChallengeManager::Instance().HandlePlayerLogout(player);
+    }
+
+    bool OnPlayerCanRepopAtGraveyard(Player* player) override
+    {
+        if (ChallengeManager::Instance().IsPermadeathPending(player))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    void OnPlayerReleasedGhost(Player* player) override
+    {
+        if (!player)
+            return;
+
+        if (!ChallengeManager::Instance().IsPermadeathPending(player))
+            return;
+
+        uint32 mapId = sConfigMgr->GetOption<uint32>("ChallengeSystem.Permadeath.GhostMap", 0);
+        float x = sConfigMgr->GetOption<float>("ChallengeSystem.Permadeath.GhostX", -11075.463f);
+        float y = sConfigMgr->GetOption<float>("ChallengeSystem.Permadeath.GhostY", -1795.9891f);
+        float z = sConfigMgr->GetOption<float>("ChallengeSystem.Permadeath.GhostZ", 52.717907f);
+        float o = sConfigMgr->GetOption<float>("ChallengeSystem.Permadeath.GhostO", 0.043097086f);
+
+        player->TeleportTo(mapId, x, y, z, o);
+    }
+
+    bool OnPlayerCanResurrect(Player* player) override
+    {
+        if (ChallengeManager::Instance().IsPermadeathPending(player))
+        {
+            SendPlayerNotification(player, "Resurrection is disabled while permadeath is pending.");
+            return false;
+        }
+
+        return true;
+    }
+
+    void OnPlayerPVPKill(Player* /*killer*/, Player* killed) override
+    {
+        ChallengeManager::Instance().RecordPvPDeath(killed);
+    }
+
+    void OnPlayerKilledByCreature(Creature* /*killer*/, Player* killed) override
+    {
+        ChallengeManager::Instance().RecordPvEDeath(killed);
     }
 
     bool OnPlayerBeforeTeleport(Player* player, uint32 /*mapid*/, float /*x*/, float /*y*/, float /*z*/,
@@ -118,10 +184,7 @@ public:
 
     void OnPlayerJustDied(Player* player) override
     {
-        if (ChallengeManager::Instance().HandleDeath(player))
-        {
-            SendPlayerNotification(player, "Hardcore failed for this tier (death). You may continue playing, but the tier is marked failed.");
-        }
+        ChallengeManager::Instance().HandleDeath(player);
     }
 };
 
@@ -173,4 +236,5 @@ void AddChallengeSystemScripts()
     new ChallengeSystemHooks();
     new ChallengeSystemMiscHooks();
     new ChallengeSystemMailHooks();
+    AddChallengeSystemCommands();
 }

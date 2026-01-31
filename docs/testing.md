@@ -1,34 +1,68 @@
-# Testing (Temporary Aura Switches)
+# Testing (GM Commands + Dev Auras)
 
-For early development, Challenge restrictions can be toggled by applying GM auras.
-This is a temporary stand-in for real tier state tracking.
+The challenge system now reads active tier/flags from `character_settings`.
+Use GM commands for testing; auras are a fallback override.
 
-## Config
+## GM commands (preferred)
+
+Commands apply to the selected player if one is targeted, otherwise to yourself.
+
+- `.ipchallenge set tier <0-3> flags <mask>`
+  - Example: `.ipchallenge set tier 1 flags 5`
+- `.ipchallenge clear`
+- `.ipchallenge status`
+
+Flag bitmask (locked):
+- Hardcore = 1
+- Solo Only = 2
+- No Trade = 4
+- No Mail = 8
+- No AH = 16
+- No Summons = 32
+- Permadeath = 64
+
+## Aura override (DEV fallback)
+
+If a test aura is configured AND the player has that aura, the restriction is treated as active.
 
 Set these keys in `mod-ip-challengesystem.conf`:
+- `ChallengeSystem.TestAura.Hardcore`
+- `ChallengeSystem.TestAura.SoloOnly`
+- `ChallengeSystem.TestAura.NoTrade`
+- `ChallengeSystem.TestAura.NoMail`
+- `ChallengeSystem.TestAura.NoAuction`
+- `ChallengeSystem.TestAura.NoSummons`
+- `ChallengeSystem.TestAura.Permadeath`
 
-- `ChallengeSystem.TestAura.Hardcore` (spell aura ID)
-- `ChallengeSystem.TestAura.SoloOnly` (spell aura ID)
-- `ChallengeSystem.TestAura.NoTrade` (spell aura ID)
-- `ChallengeSystem.TestAura.NoMail` (spell aura ID)
-- `ChallengeSystem.TestAura.NoAuction` (spell aura ID)
-- `ChallengeSystem.TestAura.NoSummons` (spell aura ID)
-- `ChallengeSystem.TestAura.Permadeath` (spell aura ID)
-
-If a key is `0`, the restriction is treated as inactive.
-
-## In-game usage
-
-1) Set the config values to valid spell aura IDs.
-2) Apply the aura to a character to simulate the restriction:
+Usage:
+1) Apply the aura to a character:
    - `.aura <spellId>`
-3) Remove the aura when done:
+2) Remove when done:
    - `.unaura <spellId>`
 
-## TODO
+## Permadeath behavior + config
 
-Replace aura-based testing with real tier/restriction state from the database.
+When Permadeath is active and the configured death context counts, the character is marked dead in
+`ip_permadeath`, release/resurrection are denied during the kick delay, and the session is disconnected.
+Permadead characters are locked out on login.
+If the player releases spirit during the pending window, the ghost is teleported to the configured
+Permadeath.Ghost* location.
+
+Config keys:
+- `ChallengeSystem.Permadeath.Enable`
+- `ChallengeSystem.Permadeath.KickDelaySeconds`
+- `ChallengeSystem.Permadeath.Broadcast`
+- `ChallengeSystem.Permadeath.CountPvPDeaths`
+- `ChallengeSystem.Permadeath.CountBattlegroundDeaths`
+- `ChallengeSystem.Permadeath.CountArenaDeaths`
+- `ChallengeSystem.Permadeath.CountDuelDeaths`
+- `ChallengeSystem.Permadeath.GhostMap`
+- `ChallengeSystem.Permadeath.GhostX`
+- `ChallengeSystem.Permadeath.GhostY`
+- `ChallengeSystem.Permadeath.GhostZ`
+- `ChallengeSystem.Permadeath.GhostO`
 
 ## Notes
 
-Warning: `NO_SUMMONS` currently blocks summon accepts (e.g., warlock/meeting stone) via the teleport hook. Some teleport/portal paths may bypass this until deeper hooks are added. TODO: expand summon/portal detection coverage.
+Warning: `NO_SUMMONS` currently blocks summon accepts (e.g., warlock/meeting stone) via the teleport hook.
+Some teleport/portal paths may bypass this until deeper hooks are added. TODO: expand summon/portal detection coverage.

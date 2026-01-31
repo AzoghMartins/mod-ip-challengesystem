@@ -16,6 +16,22 @@ ChallengeSystem.Hardcore.AutoReinviteGuild = 1
 ChallengeSystem.Hardcore.BlockPlayerBots = 1
 
 # ----------------------------------------------------------------
+# Permadeath settings
+# ----------------------------------------------------------------
+ChallengeSystem.Permadeath.Enable = 1
+ChallengeSystem.Permadeath.KickDelaySeconds = 30
+ChallengeSystem.Permadeath.Broadcast = 1
+ChallengeSystem.Permadeath.CountPvPDeaths = 0
+ChallengeSystem.Permadeath.CountBattlegroundDeaths = 0
+ChallengeSystem.Permadeath.CountArenaDeaths = 0
+ChallengeSystem.Permadeath.CountDuelDeaths = 0
+ChallengeSystem.Permadeath.GhostMap = 0
+ChallengeSystem.Permadeath.GhostX = -11075.463
+ChallengeSystem.Permadeath.GhostY = -1795.9891
+ChallengeSystem.Permadeath.GhostZ = 52.717907
+ChallengeSystem.Permadeath.GhostO = 0.043097086
+
+# ----------------------------------------------------------------
 # Temporary test auras (DEV ONLY)
 # Set to a spell aura ID to simulate a restriction for testing.
 # 0 disables the test aura.

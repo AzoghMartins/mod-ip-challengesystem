@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
 
 class Player;
@@ -28,17 +29,36 @@ class ChallengeManager
 public:
     static ChallengeManager& Instance();
 
+    // Challenge flags (bitmask)
+    static constexpr uint32 FLAG_HARDCORE   = 1;
+    static constexpr uint32 FLAG_SOLO_ONLY  = 2;
+    static constexpr uint32 FLAG_NO_TRADE   = 4;
+    static constexpr uint32 FLAG_NO_MAIL    = 8;
+    static constexpr uint32 FLAG_NO_AUCTION = 16;
+    static constexpr uint32 FLAG_NO_SUMMONS = 32;
+    static constexpr uint32 FLAG_PERMADEATH = 64;
+
     // Lifecycle
     void OnTierStart(Player* player);
     void OnTierEnd(Player* player);
-    void HandlePlayerUpdate(Player* player);
+    void HandlePlayerLogin(Player* player);
     void HandlePlayerLogout(Player* player);
 
     // Restriction registry
     void RegisterRestriction(std::shared_ptr<ChallengeRestriction> restriction);
 
     // Query
-    bool HasRestriction(Player* player, const std::string& restrictionId) const;
+    bool HasRestriction(Player* player, const std::string& restrictionId);
+    uint8 GetActiveTier(Player* player);
+    uint32 GetActiveFlags(Player* player);
+    void SetActiveTierFlags(Player* player, uint8 tier, uint32 flags);
+    void ClearActiveTierFlags(Player* player);
+    bool IsPermadead(Player* player);
+    bool IsPermadeathPending(Player* player) const;
+    void ClearPermadeathPending(uint32 guid);
+    void RecordPvPDeath(Player* killed);
+    void RecordPvEDeath(Player* killed);
+    void UpsertChallengeRunActive(Player* player, uint8 tier, uint32 flags);
 
     // Event dispatch (called from hooks)
     bool HandleTradeAttempt(Player* player, Player* target);
@@ -53,9 +73,21 @@ public:
 private:
     ChallengeManager() = default;
 
+    struct ActiveState
+    {
+        uint8 tier = 0;
+        uint32 flags = 0;
+    };
+
+    ActiveState LoadActiveState(uint32 guid);
+    ActiveState& GetOrLoadActiveState(uint32 guid);
+
     std::vector<std::shared_ptr<ChallengeRestriction>> _restrictions;
-    std::unordered_set<uint64> _permadeathActive;
-    std::unordered_set<uint64> _permadeathFailures;
+    std::unordered_map<uint32, ActiveState> _activeStates;
+    std::unordered_set<uint32> _permadeathPendingKick;
+    std::unordered_set<uint32> _permadeathCache;
+    std::unordered_map<uint32, uint32> _pvpDeathMarks;
+    std::unordered_map<uint32, uint32> _pveDeathMarks;
 };
 
 #endif // MOD_IP_CHALLENGESYSTEM_CHALLENGE_MANAGER_H
