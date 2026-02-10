@@ -29,6 +29,7 @@ class ChallengeManager
 {
 public:
     static ChallengeManager& Instance();
+    bool IsEnabled() const;
 
     // Challenge flags (bitmask)
     static constexpr uint32 FLAG_HARDCORE   = 1;
@@ -113,6 +114,8 @@ private:
     std::unordered_map<uint32, uint32> _pvpDeathMarks;
     std::unordered_map<uint32, uint32> _pveDeathMarks;
     std::unordered_map<uint32, uint32> _noBuffsUpdateAccumulator;
+    std::unordered_map<uint32, uint32> _groupViolationGraceDeadline;
+    std::unordered_map<uint32, uint32> _groupViolationLastWarningAt;
 };
 
 #endif // MOD_IP_CHALLENGESYSTEM_CHALLENGE_MANAGER_H

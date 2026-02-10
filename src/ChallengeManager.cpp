@@ -8,6 +8,7 @@
 #include "Group.h"
 #include "GuildMgr.h"
 #include "Item.h"
+#include "Mail.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "SpellAuras.h"
@@ -97,6 +98,16 @@ bool HasTestAura(Player* player, char const* configKey)
 bool IsPermadeathEnabled()
 {
     return sConfigMgr->GetOption<bool>("ChallengeSystem.Permadeath.Enable", true);
+}
+
+bool IsChallengeSystemEnabled()
+{
+    return sConfigMgr->GetOption<bool>("ChallengeSystem.Enable", true);
+}
+
+uint32 GetGroupGracePeriodSeconds()
+{
+    return sConfigMgr->GetOption<uint32>("ChallengeSystem.GroupGracePeriod", 45);
 }
 
 uint32 GetPermadeathKickDelaySeconds()
@@ -306,6 +317,11 @@ ChallengeManager& ChallengeManager::Instance()
     return instance;
 }
 
+bool ChallengeManager::IsEnabled() const
+{
+    return IsChallengeSystemEnabled();
+}
+
 void ChallengeManager::OnTierStart(Player* /*player*/)
 {
 }
@@ -317,6 +333,9 @@ void ChallengeManager::OnTierEnd(Player* /*player*/)
 void ChallengeManager::HandlePlayerLogin(Player* player)
 {
     if (!player)
+        return;
+
+    if (!IsEnabled())
         return;
 
     uint32 guid = player->GetGUID().GetCounter();
@@ -339,6 +358,8 @@ void ChallengeManager::HandlePlayerLogout(Player* player)
     _pvpDeathMarks.erase(guid);
     _pveDeathMarks.erase(guid);
     _noBuffsUpdateAccumulator.erase(guid);
+    _groupViolationGraceDeadline.erase(guid);
+    _groupViolationLastWarningAt.erase(guid);
 }
 
 uint32 ChallengeManager::EnforceEquipmentRestrictions(Player* player)
@@ -361,11 +382,26 @@ uint32 ChallengeManager::EnforceEquipmentRestrictions(Player* player)
 
         ItemPosCountVec dest;
         InventoryResult msg = player->CanStoreItem(NULL_BAG, NULL_SLOT, dest, item, false);
-        if (msg != EQUIP_ERR_OK)
+        if (msg == EQUIP_ERR_OK)
+        {
+            player->RemoveItem(INVENTORY_SLOT_BAG_0, slot, true);
+            player->StoreItem(dest, item, true);
+            ++removed;
             continue;
+        }
 
-        player->RemoveItem(INVENTORY_SLOT_BAG_0, slot, true);
-        player->StoreItem(dest, item, true);
+        // If inventory is full, force-unequip and mail the item so restrictions cannot be bypassed.
+        player->MoveItemFromInventory(INVENTORY_SLOT_BAG_0, slot, true);
+        CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+        item->DeleteFromInventoryDB(trans);
+        item->SaveToDB(trans);
+
+        MailDraft("Challenge restriction: item unequipped",
+            "An equipped item violated active Challenge restrictions and was mailed to you because your bags were full.")
+            .AddItem(item)
+            .SendMailTo(trans, player, MailSender(player, MAIL_STATIONERY_GM), MAIL_CHECK_MASK_COPIED);
+
+        CharacterDatabase.CommitTransaction(trans);
         ++removed;
     }
 
@@ -411,10 +447,66 @@ void ChallengeManager::HandlePlayerUpdate(Player* player, uint32 diff)
 
     uint32 guid = player->GetGUID().GetCounter();
 
+    if (!IsEnabled())
+    {
+        _noBuffsUpdateAccumulator.erase(guid);
+        _groupViolationGraceDeadline.erase(guid);
+        _groupViolationLastWarningAt.erase(guid);
+        return;
+    }
+
     if (HasRestriction(player, kRestrictionNoMounts))
     {
         if (player->IsMounted())
             player->Dismount();
+    }
+
+    Group* group = player->GetGroup();
+    bool invalidManualGroup = group && !group->isLFGGroup() && !HandleGroupAccept(player, group);
+    if (!invalidManualGroup)
+    {
+        _groupViolationGraceDeadline.erase(guid);
+        _groupViolationLastWarningAt.erase(guid);
+    }
+    else
+    {
+        uint32 gracePeriod = GetGroupGracePeriodSeconds();
+        if (gracePeriod == 0)
+        {
+            player->RemoveFromGroup(GROUP_REMOVEMETHOD_LEAVE);
+            SendMessage(player, "ChallengeSystem.Message.GroupBlocked",
+                "Grouping is disabled by active Challenge restrictions.");
+            _groupViolationGraceDeadline.erase(guid);
+            _groupViolationLastWarningAt.erase(guid);
+        }
+        else
+        {
+            uint32 now = GameTime::GetGameTime().count();
+            uint32& deadline = _groupViolationGraceDeadline[guid];
+            uint32& lastWarnAt = _groupViolationLastWarningAt[guid];
+
+            if (deadline == 0 || now > deadline)
+            {
+                deadline = now + gracePeriod;
+                lastWarnAt = 0;
+            }
+
+            if (now >= deadline)
+            {
+                player->RemoveFromGroup(GROUP_REMOVEMETHOD_LEAVE);
+                SendMessage(player, "ChallengeSystem.Message.GroupBlocked",
+                    "Grouping is disabled by active Challenge restrictions.");
+                _groupViolationGraceDeadline.erase(guid);
+                _groupViolationLastWarningAt.erase(guid);
+            }
+            else if ((lastWarnAt == 0 || now - lastWarnAt >= 10) && player->GetSession())
+            {
+                ChatHandler(player->GetSession()).SendSysMessage(
+                    Acore::StringFormat("Challenge restriction: leave your group within {} seconds or you will be removed.",
+                        deadline - now).c_str());
+                lastWarnAt = now;
+            }
+        }
     }
 
     if (!HasRestriction(player, kRestrictionNoBuffs))
@@ -663,6 +755,9 @@ bool ChallengeManager::IsPermadead(Player* player)
     if (!player)
         return false;
 
+    if (!IsEnabled())
+        return false;
+
     uint32 guid = player->GetGUID().GetCounter();
     if (_permadeathCache.find(guid) != _permadeathCache.end())
         return true;
@@ -683,6 +778,9 @@ bool ChallengeManager::IsPermadead(Player* player)
 bool ChallengeManager::IsPermadeathPending(Player* player) const
 {
     if (!player)
+        return false;
+
+    if (!IsEnabled())
         return false;
 
     uint32 guid = player->GetGUID().GetCounter();
@@ -729,6 +827,9 @@ void ChallengeManager::RecordPvEDeath(Player* killed)
 bool ChallengeManager::HasRestriction(Player* player, const std::string& restrictionId)
 {
     if (!player)
+        return false;
+
+    if (!IsEnabled())
         return false;
 
     uint32 flags = GetActiveFlags(player);
